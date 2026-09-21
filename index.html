@@ -1,0 +1,91 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#111111">
+<title>Quick Format</title>
+<style>
+:root{color-scheme:light dark;--bg:#f5f5f3;--panel:#fff;--text:#171717;--muted:#6d6d6d;--line:#d9d9d5;--chip:#ededeb;--active:#171717;--activeText:#fff;--danger:#a33;--shadow:0 8px 28px rgba(0,0,0,.07)}
+@media(prefers-color-scheme:dark){:root{--bg:#0f0f0f;--panel:#171717;--text:#f2f2f2;--muted:#999;--line:#303030;--chip:#242424;--active:#f2f2f2;--activeText:#111;--shadow:none}}
+*{box-sizing:border-box}html,body{margin:0;min-height:100%;background:var(--bg);color:var(--text);font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}button,textarea,input{font:inherit}button{color:inherit}
+.app{width:min(1100px,100%);margin:auto;padding:18px 14px 28px}.top{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:14px}.brand h1{font-size:1.18rem;margin:0;font-weight:700}.brand p{margin:3px 0 0;color:var(--muted);font-size:.8rem}.modeBadge{font-size:.72rem;border:1px solid var(--line);padding:6px 9px;border-radius:999px;color:var(--muted);white-space:nowrap}
+.toolbarShell,.workspace,.activeBar{background:var(--panel);border:1px solid var(--line);border-radius:16px;box-shadow:var(--shadow)}.toolbarShell{padding:10px;margin-bottom:10px}.toolbarHead{display:flex;justify-content:space-between;align-items:center;gap:8px;margin-bottom:8px}.toolbarTitle{font-size:.76rem;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.08em}.navBtn{border:0;background:transparent;padding:7px 9px;border-radius:9px;cursor:pointer}.navBtn:hover{background:var(--chip)}
+.chips{display:flex;gap:7px;overflow-x:auto;scrollbar-width:none;padding:1px 1px 3px}.chips::-webkit-scrollbar{display:none}.chip{flex:0 0 auto;border:1px solid var(--line);background:var(--chip);padding:8px 11px;border-radius:999px;cursor:pointer;font-size:.82rem;line-height:1}.chip.active{background:var(--active);color:var(--activeText);border-color:var(--active)}.chip.command{background:transparent}.categories{display:flex;gap:7px;overflow-x:auto;scrollbar-width:none}.categories::-webkit-scrollbar{display:none}.cat{border:0;background:transparent;color:var(--muted);padding:7px 9px;border-radius:9px;cursor:pointer;white-space:nowrap}.cat.active{background:var(--chip);color:var(--text)}
+.activeBar{display:flex;align-items:center;gap:8px;padding:9px 10px;margin-bottom:10px;min-height:46px}.activeLabel{font-size:.75rem;color:var(--muted);flex:0 0 auto}.activeList{display:flex;gap:6px;overflow-x:auto;scrollbar-width:none}.activeList::-webkit-scrollbar{display:none}.activeItem{font-size:.76rem;border:1px solid var(--line);border-radius:999px;padding:6px 9px;background:var(--chip);white-space:nowrap;cursor:pointer}.none{font-size:.78rem;color:var(--muted)}
+.workspace{overflow:hidden}.workHead{display:flex;align-items:center;justify-content:space-between;padding:9px 12px;border-bottom:1px solid var(--line);gap:10px}.stats{font-size:.75rem;color:var(--muted);white-space:nowrap}.workActions{display:flex;gap:5px}.iconBtn{border:0;background:transparent;padding:7px 9px;border-radius:9px;cursor:pointer;font-size:.78rem}.iconBtn:hover{background:var(--chip)}.iconBtn.danger{color:var(--danger)}
+textarea{display:block;width:100%;min-height:52vh;resize:vertical;border:0;outline:0;background:transparent;color:var(--text);padding:18px;font-size:1rem;line-height:1.55;tab-size:4}.tableHint{display:none;padding:8px 12px;border-top:1px solid var(--line);font-size:.74rem;color:var(--muted)}.tableHint.show{display:block}.bottom{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-top:10px}.primary{border:0;background:var(--active);color:var(--activeText);padding:11px 18px;border-radius:12px;font-weight:700;cursor:pointer}.secondary{border:1px solid var(--line);background:var(--panel);padding:10px 14px;border-radius:12px;cursor:pointer}.note{font-size:.72rem;color:var(--muted)}
+.pop{position:fixed;left:50%;bottom:22px;transform:translate(-50%,20px);opacity:0;background:var(--active);color:var(--activeText);padding:8px 12px;border-radius:999px;font-size:.78rem;pointer-events:none;transition:.18s}.pop.show{opacity:1;transform:translate(-50%,0)}
+@media(min-width:760px){.chips{flex-wrap:wrap;overflow:visible}.categories{flex-wrap:wrap;overflow:visible}.app{padding-top:28px}.toolbarShell{padding:12px}textarea{min-height:58vh}}
+</style>
+</head>
+<body>
+<main class="app">
+  <header class="top">
+    <div class="brand"><h1>Quick Format</h1><p>Paste → format → copy</p></div>
+    <div id="modeBadge" class="modeBadge">Text mode</div>
+  </header>
+
+  <section class="toolbarShell">
+    <div class="toolbarHead"><span id="toolbarTitle" class="toolbarTitle">Main</span><button id="moreBtn" class="navBtn" type="button">More ›</button></div>
+    <div id="mainTools" class="chips"></div>
+    <div id="moreTools" hidden>
+      <div id="categories" class="categories"></div>
+      <div id="categoryTools" class="chips" style="margin-top:8px"></div>
+    </div>
+  </section>
+
+  <section class="activeBar"><span class="activeLabel">Active</span><div id="activeList" class="activeList"><span class="none">No rules selected</span></div></section>
+
+  <section class="workspace">
+    <div class="workHead">
+      <span id="stats" class="stats">0 words · 0 characters</span>
+      <div class="workActions"><button id="undoBtn" class="iconBtn" type="button">Undo</button><button id="clearBtn" class="iconBtn danger" type="button">Clear</button></div>
+    </div>
+    <textarea id="editor" spellcheck="false" placeholder="Paste text, paragraphs, or copied Excel / Sheets cells here…"></textarea>
+    <div id="tableHint" class="tableHint">Table detected — tabs and row breaks are preserved when copied back to Excel or Google Sheets.</div>
+  </section>
+
+  <div class="bottom"><span class="note">Processed locally in your browser.</span><button id="copyBtn" class="primary" type="button">Copy</button></div>
+</main>
+<div id="toast" class="pop">Copied</div>
+<script>
+const editor=document.getElementById('editor'), activeList=document.getElementById('activeList'), stats=document.getElementById('stats'), modeBadge=document.getElementById('modeBadge'), tableHint=document.getElementById('tableHint');
+const mainToolsEl=document.getElementById('mainTools'), moreToolsEl=document.getElementById('moreTools'), categoryToolsEl=document.getElementById('categoryTools'), categoriesEl=document.getElementById('categories'), toolbarTitle=document.getElementById('toolbarTitle'), moreBtn=document.getElementById('moreBtn');
+const history=[]; let applying=false, selectedCategory='Lines'; const active=new Set();
+const titleCase=s=>s.toLowerCase().replace(/\b([\p{L}\p{N}][\p{L}\p{N}'’-]*)/gu,w=>w.charAt(0).toUpperCase()+w.slice(1));
+const sentenceCase=s=>s.toLowerCase().replace(/(^|[.!?]\s+)([\p{L}])/gu,(m,p,c)=>p+c.toUpperCase());
+const smartNormalize=s=>s.replace(/[\u2018\u2019]/g,"'").replace(/[\u201C\u201D]/g,'"').replace(/[\u2013\u2014]/g,'-').replace(/\u00A0/g,' ').replace(/[\u200B-\u200D\uFEFF]/g,'');
+const stripMarkup=s=>s.replace(/```[\s\S]*?```/g,m=>m.replace(/^```[^\n]*\n?|```$/g,'')).replace(/\*\*([^*]+)\*\*/g,'$1').replace(/__([^_]+)__/g,'$1').replace(/~~([^~]+)~~/g,'$1').replace(/`([^`]+)`/g,'$1').replace(/!?\[([^\]]+)\]\([^\)]+\)/g,'$1').replace(/^\s{0,3}#{1,6}\s+/gm,'').replace(/^\s*>\s?/gm,'');
+const rules={
+ upper:{label:'ABC',fn:s=>s.toUpperCase(),exclusive:'case'}, lower:{label:'abc',fn:s=>s.toLowerCase(),exclusive:'case'}, sentence:{label:'Sentence',fn:sentenceCase,exclusive:'case'}, title:{label:'Title',fn:titleCase,exclusive:'case'},
+ trim:{label:'Trim',fn:s=>s.split('\n').map(x=>x.trim()).join('\n')}, spaces:{label:'Spaces',fn:s=>s.split('\n').map(x=>x.replace(/[ \t]+/g,' ').trim()).join('\n')}, blank:{label:'Blank lines',fn:s=>s.replace(/\n[\t ]*\n(?:[\t ]*\n)+/g,'\n\n')}, noBlank:{label:'No blank lines',fn:s=>s.split('\n').filter(x=>x.trim()!=='').join('\n')}, plain:{label:'Plain text',fn:s=>smartNormalize(stripMarkup(s.replace(/<[^>]*>/g,'')))}, normalize:{label:'Normalize',fn:smartNormalize},
+ join:{label:'Join lines',fn:s=>s.replace(/([^\n])\n(?!\n)/g,'$1 ')}, dedupe:{label:'Duplicates',fn:s=>{const seen=new Set();return s.split('\n').filter(x=>{const k=x.trim();if(!k||seen.has(k))return !k;seen.add(k);return true}).join('\n')}}, sortAZ:{label:'Sort A–Z',command:true,fn:s=>s.split('\n').sort((a,b)=>a.localeCompare(b,undefined,{numeric:true,sensitivity:'base'})).join('\n')}, sortZA:{label:'Sort Z–A',command:true,fn:s=>s.split('\n').sort((a,b)=>b.localeCompare(a,undefined,{numeric:true,sensitivity:'base'})).join('\n')}, reverse:{label:'Reverse',command:true,fn:s=>s.split('\n').reverse().join('\n')},
+ noBullets:{label:'Remove bullets',fn:s=>s.replace(/^\s*(?:[-*•●○▪‣⁃]|\d+[.)])\s+/gm,'')}, bullets:{label:'Add bullets',fn:s=>s.split('\n').map(x=>x.trim()? '• '+x.replace(/^\s*(?:[-*•●○▪‣⁃]|\d+[.)])\s+/,''):x).join('\n')}, numbering:{label:'Number',fn:s=>{let n=0;return s.split('\n').map(x=>x.trim()?`${++n}. ${x.replace(/^\s*(?:[-*•●○▪‣⁃]|\d+[.)])\s+/,'')}`:x).join('\n')}},
+ tabsToSpaces:{label:'Tabs → spaces',fn:s=>s.replace(/\t/g,'    ')}, commasToLines:{label:'Comma → lines',fn:s=>s.split(',').map(x=>x.trim()).join('\n')}, linesToComma:{label:'Lines → comma',fn:s=>s.split('\n').map(x=>x.trim()).filter(Boolean).join(', ')}, linesToSemi:{label:'Lines → ;',fn:s=>s.split('\n').map(x=>x.trim()).filter(Boolean).join('; ')},
+ numbersOnly:{label:'Numbers only',fn:s=>s.replace(/[^0-9\n\t.,+-]/g,'')}, lettersNumbers:{label:'Letters + numbers',fn:s=>s.replace(/[^\p{L}\p{N}\s\n\t]/gu,'')}, removeEmoji:{label:'Remove emoji',fn:s=>s.replace(/[\p{Extended_Pictographic}\uFE0F]/gu,'')}
+};
+const mainIds=['upper','lower','sentence','title','trim','spaces','blank','plain','noBullets','dedupe'];
+const groups={Lines:['noBlank','join','dedupe','sortAZ','sortZA','reverse'],Lists:['noBullets','bullets','numbering'],Clean:['plain','normalize','trim','spaces','blank','noBlank','removeEmoji'],Convert:['tabsToSpaces','commasToLines','linesToComma','linesToSemi'],Data:['numbersOnly','lettersNumbers']};
+function pushHistory(){if(history.at(-1)!==editor.value){history.push(editor.value);if(history.length>40)history.shift()}}
+function detectTable(){const isTable=editor.value.includes('\t')&&editor.value.includes('\n');modeBadge.textContent=isTable?'Table mode':'Text mode';tableHint.classList.toggle('show',isTable)}
+function updateStats(){const t=editor.value;const words=(t.trim().match(/\S+/g)||[]).length;stats.textContent=`${words} word${words===1?'':'s'} · ${t.length} character${t.length===1?'':'s'}`;detectTable()}
+function applyRules(base,push=true){if(applying)return; applying=true;if(push)pushHistory();let out=base;for(const id of active)out=rules[id].fn(out);editor.value=out;applying=false;updateStats()}
+function toggleRule(id){const r=rules[id];if(r.command){pushHistory();editor.value=r.fn(editor.value);applyRules(editor.value,false);render();return}if(active.has(id))active.delete(id);else{if(r.exclusive)for(const a of [...active])if(rules[a].exclusive===r.exclusive)active.delete(a);active.add(id)}pushHistory();applyRules(editor.value,false);render()}
+function makeChip(id){const r=rules[id],b=document.createElement('button');b.type='button';b.className='chip'+(active.has(id)?' active':'')+(r.command?' command':'');b.textContent=r.label;b.onclick=()=>toggleRule(id);return b}
+function renderMain(){mainToolsEl.innerHTML='';mainIds.forEach(id=>mainToolsEl.appendChild(makeChip(id))}
+function renderCategories(){categoriesEl.innerHTML='';Object.keys(groups).forEach(g=>{const b=document.createElement('button');b.type='button';b.className='cat'+(g===selectedCategory?' active':'');b.textContent=g;b.onclick=()=>{selectedCategory=g;renderCategories();renderCategoryTools()};categoriesEl.appendChild(b)})}
+function renderCategoryTools(){categoryToolsEl.innerHTML='';groups[selectedCategory].forEach(id=>categoryToolsEl.appendChild(makeChip(id))}
+function renderActive(){activeList.innerHTML='';if(!active.size){activeList.innerHTML='<span class="none">No rules selected</span>';return}for(const id of active){const b=document.createElement('button');b.type='button';b.className='activeItem';b.textContent=rules[id].label+' ×';b.onclick=()=>toggleRule(id);activeList.appendChild(b)}}
+function render(){renderMain();renderCategoryTools();renderActive()}
+moreBtn.onclick=()=>{const entering=moreToolsEl.hidden;moreToolsEl.hidden=!entering;mainToolsEl.hidden=entering;toolbarTitle.textContent=entering?'More':'Main';moreBtn.textContent=entering?'‹ Main':'More ›'};
+document.getElementById('undoBtn').onclick=()=>{if(history.length){editor.value=history.pop();updateStats()}};
+document.getElementById('clearBtn').onclick=()=>{if(editor.value){pushHistory();editor.value='';updateStats()}};
+document.getElementById('copyBtn').onclick=async()=>{try{await navigator.clipboard.writeText(editor.value);showToast('Copied')}catch{editor.select();document.execCommand('copy');showToast('Copied')}};
+function showToast(t){const e=document.getElementById('toast');e.textContent=t;e.classList.add('show');setTimeout(()=>e.classList.remove('show'),1200)}
+editor.addEventListener('paste',()=>{pushHistory();setTimeout(()=>{if(active.size)applyRules(editor.value,false);else updateStats()},0)});
+editor.addEventListener('input',()=>{if(!applying)updateStats()});
+renderCategories();render();updateStats();
+</script>
+</body>
+</html>
